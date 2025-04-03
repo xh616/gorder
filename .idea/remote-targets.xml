@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteTargetsManager">
+    <targets>
+      <target name="root@192.168.3.221:22" type="ssh/sftp" uuid="0e69770e-1ef5-4339-aeec-93a2f7cc0210">
+        <config>
+          <option name="serverName" value="root@192.168.3.221:22 password" />
+        </config>
+        <ContributedStateBase type="GoLanguageRuntime">
+          <config>
+            <option name="compiledExecutablesVolume">
+              <VolumeState>
+                <option name="remotePath" value="/root/software/go/bin" />
+              </VolumeState>
+            </option>
+            <option name="goPath" value="/root/software/go" />
+            <option name="goRoot" value="/root/work/go/bin/go" />
+            <option name="projectSourcesVolume">
+              <VolumeState>
+                <option name="remotePath" value="/root/work/gorder" />
+              </VolumeState>
+            </option>
+          </config>
+        </ContributedStateBase>
+      </target>
+    </targets>
+  </component>
+</project>
