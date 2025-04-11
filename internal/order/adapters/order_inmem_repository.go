@@ -15,9 +15,17 @@ type MemoryOrderRepository struct {
 }
 
 func NewMemoryOrderRepository() *MemoryOrderRepository {
+	s := make([]*domain.Order, 0)
+	s = append(s, &domain.Order{
+		ID:          "fake-ID",
+		CustomerID:  "fake-customer-id",
+		Status:      "fake-order-status",
+		PaymentLink: "fake-payment-link",
+		Items:       nil,
+	})
 	return &MemoryOrderRepository{
 		lock:  &sync.RWMutex{},
-		store: make([]*domain.Order, 0),
+		store: s,
 	}
 }
 
@@ -45,7 +53,7 @@ func (m MemoryOrderRepository) Get(_ context.Context, id, customerID string) (*d
 	for _, order := range m.store {
 		if order.ID == id && order.CustomerID == customerID {
 			// 记录程序正常运行时的关键信息（如启动成功、重要业务流程完成）
-			logrus.Infof("memory_order_repo_get||found||id=%s||customerID=%s||res=%+v", id, customerID, *order)
+			logrus.Debug("memory_order_repo_get||found||id=%s||customerID=%s||res=%+v", id, customerID, *order)
 			return order, nil
 		}
 	}

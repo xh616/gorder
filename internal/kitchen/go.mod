@@ -1,7 +1,5 @@
-module github.com/xh/gorder/kitchen
+module github.com/xh/gorder/internal/kitchen
 
 go 1.23.6
 
-replace (
-	github.com/xh/gorder/common  => ../common
-)
+replace github.com/xh/gorder/internal/common => ../common

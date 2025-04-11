@@ -3,8 +3,8 @@ gen: genproto genopenapi
 
 .PHONY: genproto
 genproto:
-  @./scripts/genproto.sh
+	@./scripts/genproto.sh
 
 .PHONY: genopenapi
 genopenapi:
-  @./scripts/genopenapi.sh
+	@./scripts/genopenapi.sh

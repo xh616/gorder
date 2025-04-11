@@ -1,0 +1,31 @@
+syntax ="proto3";
+
+package stockpb;
+// option go_package 确实可以指定生成的 Go 包的路径和包名，格式如下：
+// option go_package = "路径;包名";
+option go_package = "github.com/xh/gorder/internal/common/genproto/stockpb";
+
+import "orderpb/order.proto";
+
+service stockService {
+  rpc GetItems(GetItemsRequest) returns (GetItemResponse) ;
+  rpc CheckIfItemsInStock(CheckIfItemsInStockRequest) returns (CheckIfItemsInStockResponse) ;
+}
+
+message GetItemsRequest {
+  repeated string ItemIDs = 1;
+}
+
+
+message GetItemResponse {
+  repeated orderpb.Item items =1;
+}
+
+message CheckIfItemsInStockRequest {
+  repeated orderpb.ItemWithQuantity Items =1;
+}
+
+message CheckIfItemsInStockResponse {
+  int32 InStock = 1;
+  repeated orderpb.Item items = 2;
+}
