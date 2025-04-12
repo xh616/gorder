@@ -29,7 +29,7 @@ func NewMemoryOrderRepository() *MemoryOrderRepository {
 	}
 }
 
-func (m MemoryOrderRepository) Create(_ context.Context, order *domain.Order) (*domain.Order, error) {
+func (m *MemoryOrderRepository) Create(_ context.Context, order *domain.Order) (*domain.Order, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	newOrder := &domain.Order{
@@ -47,9 +47,12 @@ func (m MemoryOrderRepository) Create(_ context.Context, order *domain.Order) (*
 	return newOrder, nil
 }
 
-func (m MemoryOrderRepository) Get(_ context.Context, id, customerID string) (*domain.Order, error) {
+func (m *MemoryOrderRepository) Get(_ context.Context, id, customerID string) (*domain.Order, error) {
 	m.lock.RLock()
 	defer m.lock.RUnlock()
+	for i, v := range m.store {
+		logrus.Debug("m.store[%d]=%+v", i, v)
+	}
 	for _, order := range m.store {
 		if order.ID == id && order.CustomerID == customerID {
 			// 记录程序正常运行时的关键信息（如启动成功、重要业务流程完成）
@@ -60,7 +63,7 @@ func (m MemoryOrderRepository) Get(_ context.Context, id, customerID string) (*d
 	return nil, domain.NotFoundError{OrderId: id}
 }
 
-func (m MemoryOrderRepository) Update(ctx context.Context, o *domain.Order, updateFun func(context.Context, *domain.Order) (*domain.Order, error)) error {
+func (m *MemoryOrderRepository) Update(ctx context.Context, o *domain.Order, updateFun func(context.Context, *domain.Order) (*domain.Order, error)) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	found := false
