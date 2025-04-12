@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/xh/gorder/internal/common/config"
+	"github.com/xh/gorder/internal/common/discovery"
 	"github.com/xh/gorder/internal/common/genproto/orderpb"
 	"github.com/xh/gorder/internal/common/server"
 	"github.com/xh/gorder/internal/order/ports"
@@ -27,6 +28,15 @@ func main() {
 
 	application, cleanup := service.NewApplication(ctx)
 	defer cleanup()
+
+	// 注册consul
+	deregisterFunc, err := discovery.RegisterToConsul(ctx, serviceName)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	defer func() {
+		_ = deregisterFunc()
+	}()
 
 	// gRPC服务
 	go server.RunGRPCServer(serviceName, func(server *grpc.Server) {
