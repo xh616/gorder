@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" serverName="192.168.3.221" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false">
+  <component name="PublishConfigData" autoUpload="On explicit save action" serverName="192.168.3.221" exclude=".svn;.cvs;.idea;.DS_Store;.git;.hg;*.hprof;*.pyc,*.toml" remoteFilesAllowedToDisappearOnAutoupload="false" confirmBeforeUploading="false" autoUploadExternalChanges="true">
     <option name="confirmBeforeUploading" value="false" />
     <serverData>
       <paths name="192.168.3.221">
@@ -8,8 +8,19 @@
           <mappings>
             <mapping deploy="/root/work/gorder" local="$PROJECT_DIR$" web="/" />
           </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/internal/order/.air.toml" />
+            <excludedPath path="/root/work/gorder/internal/order/.air.toml" />
+            <excludedPath path="/root/work/gorder/internal/order/tmp" />
+            <excludedPath path="/root/work/gorder/internal/stock/tmp" />
+            <excludedPath path="/root/work/gorder/internal/stock/.air.toml" />
+            <excludedPath local="true" path="$PROJECT_DIR$/internal/order/tmp" />
+            <excludedPath local="true" path="$PROJECT_DIR$/internal/stock/tmp" />
+            <excludedPath local="true" path="$PROJECT_DIR$/internal/stock/.air.toml" />
+          </excludedPaths>
         </serverdata>
       </paths>
     </serverData>
+    <option name="myAutoUpload" value="ON_EXPLICIT_SAVE" />
   </component>
 </project>

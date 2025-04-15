@@ -7,6 +7,7 @@ import (
 	"github.com/xh/gorder/internal/common/config"
 	"github.com/xh/gorder/internal/common/discovery"
 	"github.com/xh/gorder/internal/common/genproto/stockpb"
+	"github.com/xh/gorder/internal/common/logging"
 	"github.com/xh/gorder/internal/common/server"
 	"github.com/xh/gorder/internal/stock/ports"
 	"github.com/xh/gorder/internal/stock/service"
@@ -14,6 +15,7 @@ import (
 )
 
 func init() {
+	logging.Init()
 	if err := config.NewViperConfig(); err != nil {
 		logrus.Fatal(err)
 	}

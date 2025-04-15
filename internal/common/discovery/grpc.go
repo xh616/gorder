@@ -10,7 +10,7 @@ import (
 
 func RegisterToConsul(ctx context.Context, serviceName string) (func() error, error) {
 	// 创建 Consul 注册客户端
-	registry, err := consul.New(viper.GetString("consul.addr"))
+	registry, err := consul.New(viper.GetString("consul.addr")) //默认127.0.0.1:8500
 	if err != nil {
 		return func() error { return nil }, err
 	}
