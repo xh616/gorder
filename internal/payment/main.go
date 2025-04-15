@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/xh/gorder/internal/common/broker"
 	"github.com/xh/gorder/internal/common/config"
 	"github.com/xh/gorder/internal/common/logging"
 	"github.com/xh/gorder/internal/common/server"
@@ -17,6 +18,19 @@ func init() {
 
 func main() {
 	serverType := viper.GetString("payment.server-to-run")
+
+	// 初始化MQ
+	ch, closeCh := broker.Connect(
+		viper.GetString("rabbitmq.user"),
+		viper.GetString("rabbitmq.password"),
+		viper.GetString("rabbitmq.host"),
+		viper.GetString("rabbitmq.port"),
+	)
+	defer func() {
+		_ = ch.Close()
+		_ = closeCh()
+	}()
+
 	paymentHandler := NewPaymentHandler()
 	switch serverType {
 	case "http":
