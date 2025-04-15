@@ -7,6 +7,7 @@ import (
 	"github.com/xh/gorder/internal/common/config"
 	"github.com/xh/gorder/internal/common/logging"
 	"github.com/xh/gorder/internal/common/server"
+	"github.com/xh/gorder/internal/payment/infrastructure/consumer"
 )
 
 func init() {
@@ -30,6 +31,9 @@ func main() {
 		_ = ch.Close()
 		_ = closeCh()
 	}()
+
+	// 开个协程监听实现消费者
+	go consumer.NewConsumer().Listen(ch)
 
 	paymentHandler := NewPaymentHandler()
 	switch serverType {
