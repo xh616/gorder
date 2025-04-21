@@ -5,11 +5,29 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/xh/gorder/internal/common/discovery"
+	"github.com/xh/gorder/internal/common/genproto/orderpb"
 	"github.com/xh/gorder/internal/common/genproto/stockpb"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
+
+func NewOrderGRPCClient(ctx context.Context) (client orderpb.OrderServiceClient, close func() error, err error) {
+	grpcAddr, err := discovery.GetServiceAddr(ctx, viper.GetString("order.service-name"))
+	if err != nil {
+		return nil, func() error { return nil }, err
+	}
+	if grpcAddr == "" {
+		logrus.Warn("empty grpc addr for order grpc")
+	}
+	opts := grpcDialOpts(grpcAddr)
+
+	conn, err := grpc.NewClient(grpcAddr, opts...)
+	if err != nil {
+		return nil, func() error { return nil }, err
+	}
+	return orderpb.NewOrderServiceClient(conn), conn.Close, nil
+}
 
 func NewStockGRPCClient(ctx context.Context) (client stockpb.StockServiceClient, close func() error, err error) {
 	grpcAddr, err := discovery.GetServiceAddr(ctx, viper.GetString("stock.service-name"))
