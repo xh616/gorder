@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consul
+  namespace: gorder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consul
+  template:
+    metadata:
+      labels:
+        app: consul
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/edge
+                    operator: DoesNotExist
+      containers:
+        - name: consul
+          image: hashicorp/consul
+          args: ["agent", "-server", "-ui", "-node=server-1", "-bootstrap-expect=1", "-client=0.0.0.0"]
+          ports:
+            - containerPort: 8500
+              name: http
+              protocol: TCP
+            - containerPort: 8600
+              name: dns
+              protocol: UDP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: consul
+  namespace: gorder
+spec:
+  type: NodePort
+  selector:
+    app: consul
+  ports:
+    - name: http
+      port: 8500
+      targetPort: 8500
+      protocol: TCP
+      nodePort: 30085
+    - name: dns-udp
+      port: 8600
+      targetPort: 8600
+      protocol: UDP
+      nodePort: 30086

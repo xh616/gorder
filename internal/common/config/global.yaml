@@ -18,13 +18,15 @@ payment:
   grpc-addr: 127.0.0.1:5004
 
 consul:
-  addr: 127.0.0.1:8500
+#  addr: 127.0.0.1:8500
+  addr: 127.0.0.1:30085
 
 rabbitmq:
   user: guest
   password: guest
   host: 127.0.0.1
-  port: 5672
+#  port: 5672
+  port: 30672
   max-retry: 3
 
 stripe-key: "${STRIPE_KEY}" # 去环境变量里找

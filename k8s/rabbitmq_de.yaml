@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+  namespace: gorder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/edge
+                    operator: DoesNotExist
+      containers:
+        - name: rabbitmq
+          image: rabbitmq:3-management
+          ports:
+            - containerPort: 15672
+              name: management
+              protocol: TCP
+            - containerPort: 5672
+              name: amqp
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+  namespace: gorder
+spec:
+  type: NodePort
+  selector:
+    app: rabbitmq
+  ports:
+    - name: management
+      port: 15672
+      targetPort: 15672
+      protocol: TCP
+      nodePort: 31672
+    - name: amqp
+      port: 5672
+      targetPort: 5672
+      protocol: TCP
+      nodePort: 30672
