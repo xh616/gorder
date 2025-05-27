@@ -41,7 +41,7 @@ func (c *Consumer) Listen(ch *amqp.Channel) {
 	<-forever //让这个Listen永远阻塞住
 }
 
-func (c *Consumer) handleMessage(msg amqp.Delivery, q amqp.Queue, ch *amqp.Channel) {
+func (c *Consumer) handleMessage(msg amqp.Delivery, q amqp.Queue, _ *amqp.Channel) {
 	logrus.Infof("Payment receive a message from %s, msg=%v", q.Name, string(msg.Body))
 	o := &orderpb.Order{}
 	if err := json.Unmarshal(msg.Body, o); err != nil {

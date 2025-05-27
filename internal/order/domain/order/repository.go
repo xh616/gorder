@@ -16,9 +16,9 @@ type Repository interface {
 }
 
 type NotFoundError struct {
-	OrderId string
+	OrderID string
 }
 
 func (e NotFoundError) Error() string {
-	return fmt.Sprintf("order not found: %s", e.OrderId)
+	return fmt.Sprintf("order not found: %s", e.OrderID)
 }

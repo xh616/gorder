@@ -60,7 +60,7 @@ func (m *MemoryOrderRepository) Get(_ context.Context, id, customerID string) (*
 			return order, nil
 		}
 	}
-	return nil, domain.NotFoundError{OrderId: id}
+	return nil, domain.NotFoundError{OrderID: id}
 }
 
 func (m *MemoryOrderRepository) Update(ctx context.Context, o *domain.Order, updateFun func(context.Context, *domain.Order) (*domain.Order, error)) error {
@@ -78,7 +78,7 @@ func (m *MemoryOrderRepository) Update(ctx context.Context, o *domain.Order, upd
 		}
 	}
 	if !found {
-		return domain.NotFoundError{OrderId: o.ID}
+		return domain.NotFoundError{OrderID: o.ID}
 	}
 	return nil
 }

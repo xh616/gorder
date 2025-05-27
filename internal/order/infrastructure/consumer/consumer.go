@@ -43,7 +43,7 @@ func (c *Consumer) Listen(ch *amqp.Channel) {
 	<-forever
 }
 
-func (c *Consumer) handleMessage(ch *amqp.Channel, msg amqp.Delivery, q amqp.Queue) {
+func (c *Consumer) handleMessage(_ *amqp.Channel, msg amqp.Delivery, _ amqp.Queue) {
 	var err error
 	defer func() {
 		if err != nil {
