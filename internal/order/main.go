@@ -5,11 +5,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/xh/gorder/internal/common/broker"
 	"github.com/xh/gorder/internal/common/config"
 	"github.com/xh/gorder/internal/common/discovery"
 	"github.com/xh/gorder/internal/common/genproto/orderpb"
 	"github.com/xh/gorder/internal/common/logging"
 	"github.com/xh/gorder/internal/common/server"
+	"github.com/xh/gorder/internal/order/infrastructure/consumer"
 	"github.com/xh/gorder/internal/order/ports"
 	"github.com/xh/gorder/internal/order/service"
 	"google.golang.org/grpc"
@@ -39,6 +41,21 @@ func main() {
 	defer func() {
 		_ = deregisterFunc()
 	}()
+
+	// 初始化MQ
+	ch, closeCh := broker.Connect(
+		viper.GetString("rabbitmq.user"),
+		viper.GetString("rabbitmq.password"),
+		viper.GetString("rabbitmq.host"),
+		viper.GetString("rabbitmq.port"),
+	)
+	defer func() {
+		_ = ch.Close()
+		_ = closeCh()
+	}()
+
+	// 开个协程监听实现消费者
+	go consumer.NewConsumer(application).Listen(ch)
 
 	// gRPC服务
 	go server.RunGRPCServer(serviceName, func(server *grpc.Server) {
