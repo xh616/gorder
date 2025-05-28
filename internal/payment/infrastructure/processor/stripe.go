@@ -7,6 +7,7 @@ import (
 	"github.com/stripe/stripe-go/v82"
 	"github.com/stripe/stripe-go/v82/checkout/session"
 	"github.com/xh/gorder/internal/common/genproto/orderpb"
+	"github.com/xh/gorder/internal/common/tracing"
 )
 
 type StripeProcessor struct {
@@ -26,6 +27,9 @@ const (
 )
 
 func (s StripeProcessor) CreatePaymentLink(ctx context.Context, order *orderpb.Order) (string, error) {
+	_, span := tracing.Start(ctx, "stripe_processor.create_payment_link")
+	defer span.End()
+
 	// stripe的checkout配置
 	var items []*stripe.CheckoutSessionLineItemParams
 	for _, item := range order.Items {

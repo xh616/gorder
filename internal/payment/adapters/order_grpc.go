@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/sirupsen/logrus"
 	"github.com/xh/gorder/internal/common/genproto/orderpb"
+	"github.com/xh/gorder/internal/common/tracing"
 	"google.golang.org/grpc/status"
 )
 
@@ -21,6 +22,10 @@ func (o OrderGRPC) UpdateOrder(ctx context.Context, order *orderpb.Order) (err e
 			logrus.Infof("payment_adapter||update_order,err=%v", err)
 		}
 	}()
+
+	ctx, span := tracing.Start(ctx, "order_grpc.update_order")
+	defer span.End()
+
 	_, err = o.client.UpdateOrder(ctx, order)
 	return status.Convert(err).Err()
 }

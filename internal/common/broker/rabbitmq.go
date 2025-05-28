@@ -1,9 +1,11 @@
 package broker
 
 import (
+	"context"
 	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/sirupsen/logrus"
+	"go.opentelemetry.io/otel"
 )
 
 func Connect(user, password, host, port string) (*amqp.Channel, func() error) {
@@ -25,4 +27,42 @@ func Connect(user, password, host, port string) (*amqp.Channel, func() error) {
 		logrus.Fatal(err)
 	}
 	return ch, conn.Close
+}
+
+// 链路追踪把信息传给rabbitmq
+
+type RabbitMQHeaderCarrier map[string]interface{}
+
+func (r RabbitMQHeaderCarrier) Get(key string) string {
+	value, ok := r[key]
+	if !ok {
+		return ""
+	}
+	return value.(string)
+}
+
+func (r RabbitMQHeaderCarrier) Set(key string, value string) {
+	r[key] = value
+}
+
+func (r RabbitMQHeaderCarrier) Keys() []string {
+	keys := make([]string, 0, len(r))
+	i := 0
+	for k := range r {
+		keys[i] = k
+		i++
+	}
+	return keys
+}
+
+// InjectRabbitMQHeaders injects the headers into the context
+func InjectRabbitMQHeaders(ctx context.Context) map[string]interface{} {
+	carrier := make(RabbitMQHeaderCarrier)
+	otel.GetTextMapPropagator().Inject(ctx, carrier)
+	return carrier
+}
+
+// ExtractRabbitMQHeaders extracts the headers from the context
+func ExtractRabbitMQHeaders(ctx context.Context, headers map[string]interface{}) context.Context {
+	return otel.GetTextMapPropagator().Extract(ctx, RabbitMQHeaderCarrier(headers))
 }
