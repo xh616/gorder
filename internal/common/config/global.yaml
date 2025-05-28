@@ -1,6 +1,9 @@
 fallback-grpc-addr: 127.0.0.1:3030
 dial-grpc-timeout: 10
 
+jaeger:
+  url: "http://39.98.76.224:31268/api/traces" # 31268是14268的nodePort端口
+
 order:
   service-name: order
   server-to-run: http
