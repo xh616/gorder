@@ -20,7 +20,7 @@ func SetFormatter(logger *logrus.Logger) {
 			logrus.FieldKeyMsg:   "message",
 		},
 	})
-	// 想要结构化日志就注释，不要的话就取消
+	// 要结构化日志就注释掉，不要的话就留着
 	if isLocal, _ := strconv.ParseBool(os.Getenv("LOCAL_ENV")); isLocal {
 		//logger.SetFormatter(&prefixed.TextFormatter{
 		//	ForceFormatting: true,
