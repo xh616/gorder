@@ -37,5 +37,14 @@ rabbitmq:
   port: 30672
   max-retry: 3
 
+mongo:
+  user: root
+  password: password
+  host: 39.98.76.224
+#  port: 27017
+  port: 31017
+  db-name: "order"
+  coll-name: "order"
+
 stripe-key: "${STRIPE_KEY}" # 去环境变量里找
 endpoint-stripe-secret: "${ENDPOINT_STRIPE_SECRET}" # 去环境变量里找

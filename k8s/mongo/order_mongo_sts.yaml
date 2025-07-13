@@ -75,3 +75,20 @@ spec:
         resources:
           requests:
             storage: 10Gi
+
+---
+# 新增外部访问 Service（NodePort 类型）
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-mongo-external
+  namespace: gorder
+spec:
+  type: NodePort
+  ports:
+    - port: 27017
+      targetPort: 27017
+      nodePort: 31017
+      name: mongo
+  selector:
+    app: order-mongo
