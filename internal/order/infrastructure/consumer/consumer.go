@@ -45,7 +45,7 @@ func (c *Consumer) Listen(ch *amqp.Channel) {
 	<-forever
 }
 
-func (c *Consumer) handleMessage(_ *amqp.Channel, msg amqp.Delivery, q amqp.Queue) {
+func (c *Consumer) handleMessage(ch *amqp.Channel, msg amqp.Delivery, q amqp.Queue) {
 	// 取出来链路追踪的context
 	ctx := broker.ExtractRabbitMQHeaders(context.Background(), msg.Headers)
 	t := otel.Tracer("rabbitmq")
@@ -77,7 +77,10 @@ func (c *Consumer) handleMessage(_ *amqp.Channel, msg amqp.Delivery, q amqp.Queu
 	})
 	if err != nil {
 		logrus.Infof("error updating order, orderID = %s, err = %v", o.ID, err)
-		// TODO: retry
+		// retry
+		if err = broker.HandleRetry(ctx, ch, &msg); err != nil {
+			logrus.Warnf("retry_error, error handling retry, messageID=%s, err=%v", msg.MessageId, err)
+		}
 		return
 	}
 
