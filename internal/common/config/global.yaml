@@ -19,7 +19,7 @@ stock:
 payment:
   service-name: payment
   server-to-run: http
-  http-addr: 127.0.0.1:8284
+  http-addr: 0.0.0.0:8284
   grpc-addr: 127.0.0.1:5004
 
 consul:

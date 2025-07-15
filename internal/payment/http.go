@@ -11,6 +11,7 @@ import (
 	"github.com/stripe/stripe-go/v82"
 	"github.com/stripe/stripe-go/v82/webhook"
 	"github.com/xh/gorder/internal/common/broker"
+	_ "github.com/xh/gorder/internal/common/config"
 	"github.com/xh/gorder/internal/common/genproto/orderpb"
 	"github.com/xh/gorder/internal/payment/domain"
 	"go.opentelemetry.io/otel"
@@ -43,6 +44,7 @@ func (h *PaymentHandler) handleWebhook(c *gin.Context) {
 
 	event, err := webhook.ConstructEvent(payload, c.Request.Header.Get("Stripe-Signature"),
 		viper.GetString("ENDPOINT_STRIPE_SECRET"))
+	logrus.Infof(viper.GetString("ENDPOINT_STRIPE_SECRET"))
 
 	if err != nil {
 		logrus.Infof("Error verifying webhook signature: %v\n", err)
