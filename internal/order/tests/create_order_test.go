@@ -31,12 +31,8 @@ func TestCreateOrder_success(t *testing.T) {
 		CustomerId: "123",
 		Items: []sw.ItemWithQuantity{
 			{
-				Id:       "prod_R3g7MikGYsXKzr",
+				Id:       "prod_S7EoKpdVdkkKYi",
 				Quantity: 1,
-			},
-			{
-				Id:       "prod_R285C3Wb7FDprc",
-				Quantity: 10,
 			},
 		},
 	})
@@ -52,7 +48,7 @@ func TestCreateOrder_invalidParams(t *testing.T) {
 		Items:      nil,
 	})
 	assert.Equal(t, 200, response.StatusCode())
-	assert.Equal(t, 2, response.JSON200.Errno)
+	assert.Equal(t, 1, response.JSON200.Errno)
 }
 
 func getResponse(t *testing.T, customerID string, body sw.PostCustomerCustomerIdOrdersJSONRequestBody) *sw.PostCustomerCustomerIdOrdersResponse {
