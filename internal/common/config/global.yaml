@@ -22,6 +22,9 @@ payment:
   http-addr: 0.0.0.0:8284
   grpc-addr: 127.0.0.1:5004
 
+kitchen:
+  service-name: kitchen
+
 consul:
 #  addr: 127.0.0.1:8500
   addr: 39.98.76.224:30085

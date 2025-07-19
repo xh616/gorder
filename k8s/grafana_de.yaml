@@ -1,0 +1,81 @@
+# ---------------------- Grafana 配置 ----------------------
+# 1. Grafana 持久化存储 PVC（可选，根据需求启用）
+ apiVersion: v1
+ kind: PersistentVolumeClaim
+ metadata:
+   name: grafana-pvc
+   namespace: gorder
+ spec:
+   accessModes:
+     - ReadWriteOnce
+   resources:
+     requests:
+       storage: 10Gi
+   storageClassName: "local-path" #需本地有该storageClass
+
+---
+# 2. Grafana Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: gorder
+  labels:
+    app: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http
+          # 若启用持久化存储，添加以下配置：
+          volumeMounts:
+          - name: grafana-data
+            mountPath: /var/lib/grafana
+          env:
+            - name: GF_SECURITY_ADMIN_USER
+              value: "admin"       # 管理员用户名（默认 admin）
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: "admin"       # 管理员密码（默认 admin）
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+
+      volumes:
+        - name: grafana-data
+          persistentVolumeClaim:
+            claimName: grafana-pvc  # 关联 PVC（若启用）
+
+---
+# 3. Grafana Service（NodePort 类型，外部访问）
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: gorder
+  labels:
+    app: grafana
+spec:
+  type: NodePort
+  ports:
+    - port: 3000
+      targetPort: 3000
+      nodePort: 30030  # 节点端口（范围 30000-32767，可自定义）
+      name: http
+  selector:
+    app: grafana

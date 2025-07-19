@@ -1,0 +1,106 @@
+# ---------------------- Prometheus 配置 ----------------------
+# 1. Prometheus 配置文件 ConfigMap（需替换实际 prometheus.yml 内容）
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: gorder
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s  # 全局抓取间隔
+      evaluation_interval: 15s
+    scrape_configs:
+      - job_name: "demo-metrics"
+        metrics_path: /metrics
+        scrape_interval: 5s
+        static_configs:
+          - targets: ['39.98.76.224:9123'] 
+
+---
+# 2. Prometheus 持久化存储 PVC（根据集群存储环境调整）
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus-pvc
+  namespace: gorder
+spec:
+  accessModes:
+    - ReadWriteOnce  # 单节点读写
+  resources:
+    requests:
+      storage: 10Gi    # 存储容量（根据需求调整）
+  storageClassName: "local-path" #需本地有该storageClass
+
+---
+# 3. Prometheus Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: gorder
+  labels:
+    app: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+        - name: prometheus
+          image: prom/prometheus
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9090
+              name: http
+          command:
+            - /bin/prometheus
+            - --config.file=/etc/prometheus/prometheus.yml  # 显式加载配置文件
+            - --storage.tsdb.path=/prometheus
+            - --web.console.libraries=/usr/share/prometheus/console_libraries
+            - --web.console.templates=/usr/share/prometheus/consoles
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/prometheus
+              readOnly: true
+            - name: data-volume
+              mountPath: /prometheus
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+
+      volumes:
+        - name: config-volume
+          configMap:
+            name: prometheus-config  # 关联 ConfigMap
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: prometheus-pvc  # 关联 PVC
+
+---
+# 4. Prometheus Service（NodePort 类型，外部访问）
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: gorder
+  labels:
+    app: prometheus
+spec:
+  type: NodePort
+  ports:
+    - port: 9090
+      targetPort: 9090
+      nodePort: 30090  # 节点端口（范围 30000-32767，可自定义）
+      name: http
+  selector:
+    app: prometheus
