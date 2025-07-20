@@ -22,11 +22,11 @@ func NewGRPCServer(app app.Application) *GRPCServer {
 func (G GRPCServer) GetItems(ctx context.Context, request *stockpb.GetItemsRequest) (*stockpb.GetItemResponse, error) {
 	_, span := tracing.Start(ctx, "GetItems")
 	defer span.End()
-	item, err := G.app.Queries.GetItems.Handle(ctx, query.GetItems{ItemIDs: request.ItemIDs})
+	items, err := G.app.Queries.GetItems.Handle(ctx, query.GetItems{ItemIDs: request.ItemIDs})
 	if err != nil {
 		return nil, err
 	}
-	return &stockpb.GetItemResponse{Items: item}, nil
+	return &stockpb.GetItemResponse{Items: convertor.NewItemConvertor().EntitiesToProtos(items)}, nil
 }
 
 func (G GRPCServer) CheckIfItemsInStock(ctx context.Context, request *stockpb.CheckIfItemsInStockRequest) (*stockpb.CheckIfItemsInStockResponse, error) {
