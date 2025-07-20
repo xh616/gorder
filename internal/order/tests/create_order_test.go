@@ -34,6 +34,10 @@ func TestCreateOrder_success(t *testing.T) {
 				Id:       "prod_S7EoKpdVdkkKYi",
 				Quantity: 1,
 			},
+			{
+				Id:       "prod_SiOZ0hX4IiGvI3",
+				Quantity: 1,
+			},
 		},
 	})
 	t.Logf("body=%s", string(response.Body))

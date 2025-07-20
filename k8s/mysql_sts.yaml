@@ -1,0 +1,123 @@
+# StatefulSet for MySQL with Persistent Volume
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+  namespace: gorder
+spec:
+  serviceName: mysql
+  replicas: 1  # 对于单节点MySQL，设为1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0  # 建议指定版本
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "root"
+            - name: MYSQL_USER
+              value: "user"
+            - name: MYSQL_PASSWORD
+              value: "password"
+          ports:
+            - containerPort: 3306
+              name: mysql
+          volumeMounts:
+            - name: init-script
+              mountPath: /docker-entrypoint-initdb.d/init.sql
+              subPath: init.sql
+            - name: data
+              mountPath: /var/lib/mysql
+          readinessProbe:
+            exec:
+              command:
+                - mysqladmin
+                - ping
+                - -uroot
+                - -proot
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - mysqladmin
+                - ping
+                - -uroot
+                - -proot
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: init-script
+          configMap:
+            name: mysql-init-script
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 5Gi  # 根据需求调整存储大小
+        storageClassName: "local-path" #需本地有该storageClass
+
+---
+# Headless Service for Stable Network Identity
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: gorder
+spec:
+  clusterIP: None  # Headless服务
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+      name: mysql
+
+---
+# External Access Service (NodePort)
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-external
+  namespace: gorder
+spec:
+  type: NodePort
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
+      nodePort: 31006  # 节点端口 (30000-32767)
+
+---
+# ConfigMap for Initialization Script
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-script
+  namespace: gorder
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS gorder;
+    USE gorder;
+    
+    DROP TABLE IF EXISTS `o_stock`;
+    CREATE TABLE `o_stock` (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    product_id VARCHAR(255) NOT NULL,
+    quantity INT UNSIGNED NOT NULL DEFAULT 0,
+    version INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        
+    INSERT INTO o_stock (product_id, quantity, version)
+    VALUES ('prod_S7EoKpdVdkkKYi', 1000, 0), ('prod_SiOZ0hX4IiGvI3', 500, 0);
