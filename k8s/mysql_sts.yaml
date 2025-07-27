@@ -63,7 +63,7 @@ spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: 5Gi  # 根据需求调整存储大小
+            storage: 10Gi  # 根据需求调整存储大小
         storageClassName: "local-path" #需本地有该storageClass
 
 ---

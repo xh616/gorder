@@ -64,7 +64,7 @@ func (h checkIfItemsInStockHandler) Handle(ctx context.Context, query CheckIfIte
 	if err := h.checkStock(ctx, query.Items); err != nil {
 		return nil, err
 	}
-	// TODO 扣库存
+	// TODO 扣库存，分布式锁Redis
 	return res, nil
 }
 func (h checkIfItemsInStockHandler) checkStock(ctx context.Context, query []*entity.ItemWithQuantity) error {
