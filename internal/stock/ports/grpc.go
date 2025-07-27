@@ -24,7 +24,7 @@ func (G GRPCServer) GetItems(ctx context.Context, request *stockpb.GetItemsReque
 	defer span.End()
 	items, err := G.app.Queries.GetItems.Handle(ctx, query.GetItems{ItemIDs: request.ItemIDs})
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return &stockpb.GetItemResponse{Items: convertor.NewItemConvertor().EntitiesToProtos(items)}, nil
 }
