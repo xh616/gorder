@@ -56,5 +56,15 @@ mysql:
   port: 31006
   dbname: "gorder"
 
+redis:
+  local:
+    ip: 39.98.76.224
+    port: 31079
+    pool_size: 100
+    max_conn: 100
+    conn_timeout: 1000
+    read_timeout: 1000
+    write_timeout: 100
+
 stripe-key: "${STRIPE_KEY}" # 去环境变量里找
 endpoint-stripe-secret: "${ENDPOINT_STRIPE_SECRET}" # 去环境变量里找

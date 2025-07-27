@@ -35,7 +35,7 @@ func TestCreateOrder_success(t *testing.T) {
 				Quantity: 1,
 			},
 			{
-				Id:       "prod_SiOZ0hX4IiGvI3",
+				Id:       "prod_SktplXb4rLEu2t",
 				Quantity: 1,
 			},
 		},
