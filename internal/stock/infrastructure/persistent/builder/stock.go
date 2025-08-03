@@ -14,7 +14,7 @@ type Stock struct {
 
 	// extend fields
 	OrderBy       string `json:"order_by,omitempty"`
-	ForUpdateLock bool   `json:"for_update,omitempty"`
+	ForUpdateLock bool   `json:"for_update,omitempty"` //判断是否需要悲观锁
 }
 
 func NewStock() *Stock {
@@ -47,7 +47,7 @@ func (s *Stock) fillWhere(db *gorm.DB) *gorm.DB {
 		db = s.fillQuantityGT(db)
 	}
 	if s.ForUpdateLock {
-		db = db.Clauses(clause.Locking{Strength: clause.LockingStrengthUpdate})
+		db = db.Clauses(clause.Locking{Strength: clause.LockingStrengthUpdate}) //悲观锁
 	}
 	return db
 }

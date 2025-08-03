@@ -53,12 +53,15 @@ func (m MySQLStockRepository) UpdateStock(
 				logrus.Warnf("update stock transaction err=%v", err)
 			}
 		}()
+		// 悲观锁
 		err = m.updatePessimistic(ctx, tx, data, updateFn)
+		// 乐观锁
 		//err = m.updateOptimistic(ctx, tx, data, updateFn)
 		return err
 	})
 }
 
+// 乐观锁update，先读version，后update，如果version不一致，则更新失败
 func (m MySQLStockRepository) updateOptimistic(
 	ctx context.Context,
 	tx *gorm.DB,
@@ -76,8 +79,8 @@ func (m MySQLStockRepository) updateOptimistic(
 			tx,
 			builder.NewStock().ProductIDs(queryData.ID).Versions(newestRecord.Version).QuantityGT(queryData.Quantity),
 			map[string]any{
-				"quantity": gorm.Expr("quantity - ?", queryData.Quantity),
-				"version":  newestRecord.Version + 1,
+				"quantity": gorm.Expr("quantity - ?", queryData.Quantity), //gorm的扣库存写法
+				"version":  newestRecord.Version + 1,                      //成功update把version+1
 			}); err != nil {
 			return err
 		}
@@ -97,6 +100,7 @@ func (m MySQLStockRepository) unmarshalFromDatabase(dest []persistent.StockModel
 	return result
 }
 
+// 悲观锁update（for update 互斥锁）
 func (m MySQLStockRepository) updatePessimistic(
 	ctx context.Context,
 	tx *gorm.DB,

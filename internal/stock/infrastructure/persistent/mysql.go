@@ -38,6 +38,19 @@ func NewMySQL() *MySQL {
 	return &MySQL{db: db}
 }
 
+func NewMySQLWithDB(db *gorm.DB) *MySQL {
+	return &MySQL{db: db}
+}
+
+type StockModel struct {
+	ID        int64     `gorm:"column:id"`
+	ProductID string    `gorm:"column:product_id"`
+	Quantity  int32     `gorm:"column:quantity"`
+	Version   int64     `gorm:"column:version"`
+	CreatedAt time.Time `gorm:"column:created_at autoCreateTime"`
+	UpdateAt  time.Time `gorm:"column:updated_at autoUpdateTime"`
+}
+
 func (StockModel) TableName() string {
 	return "o_stock"
 }
@@ -58,13 +71,15 @@ func (d MySQL) StartTransaction(fc func(tx *gorm.DB) error) error {
 	return d.db.Transaction(fc)
 }
 
-type StockModel struct {
-	ID        int64     `gorm:"column:id"`
-	ProductID string    `gorm:"column:product_id"`
-	Quantity  int32     `gorm:"column:quantity"`
-	Version   int64     `gorm:"column:version"`
-	CreatedAt time.Time `gorm:"column:created_at autoCreateTime"`
-	UpdateAt  time.Time `gorm:"column:updated_at autoUpdateTime"`
+func (d MySQL) GetStockByID(ctx context.Context, query *builder.Stock) (*StockModel, error) {
+	_, deferLog := logging.WhenMySQL(ctx, "GetStockByID", query)
+	var result StockModel
+	tx := query.Fill(d.db.WithContext(ctx)).First(&result)
+	defer deferLog(result, &tx.Error)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return &result, nil
 }
 
 func (d MySQL) BatchGetStockByID(ctx context.Context, query *builder.Stock) ([]StockModel, error) {
@@ -76,17 +91,6 @@ func (d MySQL) BatchGetStockByID(ctx context.Context, query *builder.Stock) ([]S
 		return nil, tx.Error
 	}
 	return result, nil
-}
-
-func (d MySQL) GetStockByID(ctx context.Context, query *builder.Stock) (*StockModel, error) {
-	_, deferLog := logging.WhenMySQL(ctx, "GetStockByID", query)
-	var result StockModel
-	tx := query.Fill(d.db.WithContext(ctx)).First(&result)
-	defer deferLog(result, &tx.Error)
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-	return &result, nil
 }
 
 func (d MySQL) Update(ctx context.Context, tx *gorm.DB, cond *builder.Stock, update map[string]any) error {
